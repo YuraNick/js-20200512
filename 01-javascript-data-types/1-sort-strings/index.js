@@ -4,6 +4,6 @@
  * @param {string} [param="asc"] param - the sorting type "asc" or "desc"
  * @returns {string[]}
  */
-export function sortStrings(arr, param = 'lowerAsc') {
+export function sortStrings(arr, param = 'asc') {
 
 }

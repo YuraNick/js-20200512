@@ -8,6 +8,10 @@
     console.log(sortStrings(['абрикос', 'Абрикос', 'яблоко', 'Яблоко', 'ёжик', 'Ёжик']));
 
     import {pick} from './2-pick/index.js';
-    const obj = {foo: 'foo', bar: 'bar'};
-    console.log(pick(obj, 'foo'));
+    const objPick = {foo: 'foo', bar: 'bar'};
+    console.log(pick(objPick, 'foo'));
+    
+    import {omit} from './3-omit/index.js';
+    const objOmit = {foo: 'foo', bar: 'bar', baz: 'baz'};
+    console.log(omit(objOmit, 'foo', 'bar'));
 </script>

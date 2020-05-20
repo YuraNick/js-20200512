@@ -1,5 +1,14 @@
 <!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+</head>
 
-<script>
+<script type="module">
+    console.log('Яровиков Ю.');
+
+    import {trimSymbols} from './3-trim-symbols/index.js';
+    console.log(trimSymbols('eedaaad', 2));
+    console.log("trimSymbols('xxx', 2) = ", trimSymbols('xxx', 2));
+    console.log("trimSymbols('xxxaaaaab', 1) = ", trimSymbols('xxxaaaaab', 1));
 
 </script>

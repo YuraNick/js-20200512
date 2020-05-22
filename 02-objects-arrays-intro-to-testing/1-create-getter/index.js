@@ -8,7 +8,10 @@ export function createGetter(path) {
     
     return (obj) => {
         let result = obj;
-        pathArray.map( (item) => result = getValue(result, item) );
+        // лучше не использовать вот так: pathArray.map( (item) => result = getValue(result, item) );
+        for (const item of pathArray) {
+            result = getValue(result, item);
+        }
         return result;
     }
 

@@ -10,9 +10,8 @@
 <script type="module">
   import NotificationMessage from './index.js';
 
-  // насколько оправдан такой стиль написания подобных элементов или лучше как отдкльные ф-ии ?) :
+  // насколько оправдан такой стиль написания подобных элементов или лучше как отдкльные ф-ии (?) :
   const randomObj = {
-    // почему this.getRandomText(this.textMessageArr) не работает, т.е. почему this теряется в контексте вызова
     getMessageText() {
       return this.getRandomText(this.textMessageArr)
     },

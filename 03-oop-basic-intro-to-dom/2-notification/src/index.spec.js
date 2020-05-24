@@ -1,4 +1,5 @@
-import NotificationMessage from '../solution';
+// import NotificationMessage from '../solution';
+import NotificationMessage from './index.js';
 
 describe('dom-document-loading/notification', () => {
   let notificationMessage;

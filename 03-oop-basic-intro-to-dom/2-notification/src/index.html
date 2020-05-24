@@ -10,12 +10,49 @@
 <script type="module">
   import NotificationMessage from './index.js';
 
+  // насколько оправдан такой стиль написания подобных элементов или лучше как отдкльные ф-ии ?) :
+  const randomObj = {
+    // почему this.getRandomText(this.textMessageArr) не работает, т.е. почему this теряется в контексте вызова
+    getMessageText() {
+      return this.getRandomText(this.textMessageArr)
+    },
+    
+    getTypeText() {
+      return this.getRandomText(this.textTypeArr)
+    },
+    
+    // почему теряется this при вот таком написании:
+    // getTypeText() => this.getRandomText(this.textTypeArr), // error this = unefined
+
+    getDuration : () => Math.random() * 1e4,
+
+    textMessageArr : [
+      'document.createElement("div")',
+      'document.createTextNode("text")',
+      'node.cloneNode(deep)',
+      'parent.append(nodes or strings...)',
+      'node.remove()',
+      'parent.append/prepend(nodes or strings...)',
+      'node.before/after(nodes or strings...)',
+      'node.insertAdjacentHTML("beforeBegin| afterBegin| beforeEnd| afterEnd", html)'
+    ],
+
+    textTypeArr : ['success', 'error'],
+
+    getRandomText (textArr) {
+      const randomNum = Math.floor(Math.random() * textArr.length);
+      return textArr[randomNum];
+    }
+  }
+
   btn1.addEventListener('click', () => {
-    const notification = new NotificationMessage('Hello World', {
-      duration: 2000,
-      type: 'success'
+    const notification = new NotificationMessage(randomObj.getMessageText(), {
+      duration: randomObj.getDuration(),
+      type: randomObj.getTypeText()
     });
 
     notification.show();
   });
+
+  
 </script>

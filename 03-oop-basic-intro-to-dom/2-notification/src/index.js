@@ -1,7 +1,7 @@
 export default class NotificationMessage {
     element; // HTMLElement;
-    button;
-    timerId;
+    // button; // больше не используется
+    // timerId; // не требуется
 
     constructor(
         showText = 'Hello World!',
@@ -10,33 +10,35 @@ export default class NotificationMessage {
         // @param type = ['success' | 'error']
         this.showText = showText;
         this.duration = duration;
-        this.durationSeconds = (duration / 1000).toFixed(1);
+        this.durationSeconds = duration / 1000;
         this.type = type;
-        this.button = document.getElementById('btn1');
+        // this.button = document.getElementById('btn1');
 
         this.render();
-        this.initEventListeners();
+        // this.initEventListeners(); // не требуется
     }
 
     show (node = document.body) {
         node.append(this.element);
-        
         // как this остается в контексте класса внутри ф-ии remove() при ее выполнении внутри setTimeout?
-        this.timerId = setTimeout(() => this.remove(), this.duration);
+        setTimeout(() => this.remove(), this.duration);
+        return this.element;
     }
 
-    initEventListeners() {
-        // не лучше ли тут все-так написать 
-        // if (! this.button) return;
-        // и ниже остальной код - избавление от лишнего уровня вложенности (?)
-        if (this.button) {
-            this.button.addEventListener(
-                'click', 
-                () => this.remove(),
-                { once: true } //выполнится один раз
-            );
-        }
-    }
+    /**
+     * создается одинарное событие на кнопку, удаляющее только что созданный элемент
+     * но лучше не привязываться к какой-то конкретной кнопке
+     * initEventListeners() {
+     *  if (this.button) {
+     *      this.button.addEventListener(
+     *          'click', 
+     *          () => this.remove(),
+     *          { once: true } //выполнится один раз
+     *      );
+     *  }
+     * }
+     */
+
 
     get template() {
         return `
@@ -61,7 +63,6 @@ export default class NotificationMessage {
     }
 
     remove() {
-        if (this.timerId) clearTimeout(this.timerId); // нужно ли удалять таймер?
         this.element.remove();
     }
 

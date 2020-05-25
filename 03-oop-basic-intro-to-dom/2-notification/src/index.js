@@ -19,10 +19,16 @@ export default class NotificationMessage {
     }
 
     show (node = document.body) {
+        if (notificationElements.message && notificationElements.message.offsetWidth) {
+            // элемент ранее был и создан и отображается - удалим его со страницы
+            notificationElements.message.remove();
+        }
+
         node.append(this.element);
         // как this остается в контексте класса внутри ф-ии remove() при ее выполнении внутри setTimeout?
         setTimeout(() => this.remove(), this.duration);
-        return this.element;
+        // сохраняем элемент в глобальном объекте
+        notificationElements.message = this.element;
     }
 
     /**
@@ -58,7 +64,7 @@ export default class NotificationMessage {
         element.className = `notification ${this.type}`;
         element.setAttribute('style', `--value:${this.durationSeconds}s`);
         element.innerHTML = this.template;
-        
+
         this.element = element;
     }
 
@@ -69,4 +75,8 @@ export default class NotificationMessage {
     destroy() {
         this.remove();
     }
+}
+
+const notificationElements = {
+    message : false
 }

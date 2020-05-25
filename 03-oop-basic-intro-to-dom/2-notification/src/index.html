@@ -44,7 +44,7 @@
     }
   }
 
-  const notificationNodes = { message : false };
+  // const notificationNodes = { message : false }; // перенесено в index.js
   // document.body.append(notificationNode);
   btn1.addEventListener('click', () => {
     const notification = new NotificationMessage(randomObj.getMessageText(), {
@@ -52,13 +52,15 @@
       type: randomObj.getTypeText()
     });
 
-    if (notificationNodes.message && notificationNodes.message.offsetWidth) {
-      // элемент ранее был и создан и отображается - удалим его со страницы
-      notificationNodes.message.remove();
-    }
-
+    /**
+     * перенесено в index.js
+     * if (notificationNodes.message && notificationNodes.message.offsetWidth) {
+     *  // элемент ранее был и создан и отображается - удалим его со страницы
+     *  notificationNodes.message.remove();
+     * }
+     */ 
     // создадим новый элемент - что произойдет со старым элементом, он удалится из памяти браузера?
-    notificationNodes.message = notification.show();
+    notification.show();
   });
 
   

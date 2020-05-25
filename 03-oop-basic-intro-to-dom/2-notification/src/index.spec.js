@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // import NotificationMessage from '../solution';
+=======
+>>>>>>> 941167b941d9f9630eb4a02906754f36c1dc7450
 import NotificationMessage from './index.js';
 
 describe('dom-document-loading/notification', () => {

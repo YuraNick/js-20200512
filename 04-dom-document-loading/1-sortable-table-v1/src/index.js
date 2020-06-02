@@ -122,14 +122,7 @@ export default class SortableTable {
             if (sortObj.sortType === 'number') {
                 return sortObj.direction * (parseFloat(iValue) - parseFloat(iiValue));
             }
-            if (iValue.charCodeAt(0) < 123 && iiValue.charCodeAt(0) > 122) {
-                // без этого тесты не проходят
-                return sortObj.direction;
-            }
-            if (iValue.charCodeAt(0) > 122 && iiValue.charCodeAt(0) < 123) {
-                return -sortObj.direction;
-            }
-            return sortObj.direction * iValue.localeCompare(iiValue, 'en', {caseFirst: 'upper'});
+            return sortObj.direction * iValue.localeCompare(iiValue, 'ru', {caseFirst: 'upper'});
         });
 
         for (const row of rowsArray) {

@@ -36,7 +36,7 @@ body {
 
 .sortable-table__row {
   display: grid;
-  grid: auto-flow / 80px calc(50% - 80px) 25% 15% 15%;
+  grid: auto-flow / 80px calc(40% - 80px) 20% 15% 15% 15%;
   text-decoration: none;
 }
 .sortable-table__row.bold {

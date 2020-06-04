@@ -46,17 +46,15 @@ export default class SortableTable {
             return;
         }
 
-        header.addEventListener('click', this.headerSortEvent);
+        header.addEventListener('pointerdown', this.headerSortEvent);
     }
 
     removeEvents() {
         const header = this.subElements.header;
 
-        if (! header) {
-            return;
+        if (header) {
+            header.removeEventListener('pointerdown', this.headerSortEvent);
         }
-
-        header.removeEventListener('click', this.headerSortEvent);
     }
 
     render (sortField = null, sortOrder = 'asc') {

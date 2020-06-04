@@ -40,20 +40,14 @@ export default class SortableTable {
     }
 
     initHeaderSortEvent () {
-        const header = this.subElements.header;
-
-        if (! header) {
-            return;
+        if (this.subElements.header) {
+            this.subElements.header.addEventListener('pointerdown', this.headerSortEvent);
         }
-
-        header.addEventListener('pointerdown', this.headerSortEvent);
     }
 
     removeEvents() {
-        const header = this.subElements.header;
-
-        if (header) {
-            header.removeEventListener('pointerdown', this.headerSortEvent);
+        if (this.subElements.header) {
+            this.subElements.header.removeEventListener('pointerdown', this.headerSortEvent);
         }
     }
 

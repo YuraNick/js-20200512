@@ -1,6 +1,6 @@
-// import ColumnChart from './index.js';
+import ColumnChart from './index.js';
 // TODO: remove
-import ColumnChart from '../solution';
+// import ColumnChart from '../solution';
 
 import ordersData from "./__mocks__/orders-data.js";
 
@@ -90,6 +90,7 @@ describe('async-code-fetch-api-part-1/column-chart', () => {
     const [, contentElement] = element.children;
     const [header, body] = contentElement.children;
 
+    console.log('columnChart.data: ', columnChart.data);
     expect(header).toHaveTextContent('60');
     expect(body.children.length).toEqual(3);
   });

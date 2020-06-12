@@ -224,12 +224,7 @@ export default class SortableTable {
             const { template } = headerData;
 
             if (template) {
-                try {
-                    // Перчатки iGlover без картинки - отсюда ошибка, как лучше сделать ?
-                    return template(cellData);
-                } catch (error) {
-                    console.error(error);
-                }
+                return template(cellData);
             }
             
             return `<div class="sortable-table__cell">${cellData}</div>`;

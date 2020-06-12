@@ -16,9 +16,12 @@
       title: 'Image',
       sortable: false,
       template: data => {
+        const placeholder = 'https://medremcom.ru/wp-content/uploads/2019/12/No_photo.jpg';
+        const url = (data[0] && data[0].url) ? data[0].url : placeholder;
+        
         return `
           <div class="sortable-table__cell">
-            <img class="sortable-table-image" alt="Image" src="${data[0].url}">
+            <img class="sortable-table-image" alt="Image" src="${url}">
           </div>
         `;
       }

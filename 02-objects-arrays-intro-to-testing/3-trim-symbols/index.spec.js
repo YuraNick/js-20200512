@@ -7,10 +7,6 @@ describe('objects-arrays-intro-to-testing/trim-symbols', () => {
     expect(trimSymbols('xxxaaaaab', 1)).toEqual('xab');
   });
 
-  console.log("trimSymbols('eedaaad', 2) = ", trimSymbols('eedaaad', 2));
-  console.log("trimSymbols('xxx', 2) = ", trimSymbols('xxx', 2));
-  console.log("trimSymbols('xxxaaaaab', 1) = ", trimSymbols('xxxaaaaab', 1));
-
   it('should return empty string if it was passed to function like an argument', () => {
     expect(trimSymbols('', 2)).toEqual('');
   });

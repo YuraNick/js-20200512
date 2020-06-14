@@ -10,58 +10,12 @@
 <script type="module">
   import NotificationMessage from './index.js';
 
-  // насколько оправдан такой стиль написания подобных элементов или лучше как отдкльные ф-ии (?) :
-  const randomObj = {
-    getMessageText() {
-      return this.getRandomText(this.textMessageArr)
-    },
-    
-    getTypeText() {
-      return this.getRandomText(this.textTypeArr)
-    },
-    
-    // почему теряется this при вот таком написании:
-    // getTypeText() => this.getRandomText(this.textTypeArr), // error this = unefined
-
-    getDuration : () => Math.random() * 1e4,
-
-    textMessageArr : [
-      'document.createElement ("div")',
-      'document.createTextNode ("text")',
-      'node.cloneNode (deep)',
-      'parent.append (nodes or strings...)',
-      'node.remove()',
-      'parent.append/prepend (nodes or strings...)',
-      'node.before/after (nodes or strings...)',
-      'node.insertAdjacentHTML ("beforeBegin| afterBegin| beforeEnd| afterEnd", html)'
-    ],
-
-    textTypeArr : ['success', 'error'],
-
-    getRandomText (textArr) {
-      const randomNum = Math.floor(Math.random() * textArr.length);
-      return textArr[randomNum];
-    }
-  }
-
-  // const notificationNodes = { message : false }; // перенесено в index.js
-  // document.body.append(notificationNode);
   btn1.addEventListener('click', () => {
-    const notification = new NotificationMessage(randomObj.getMessageText(), {
-      duration: randomObj.getDuration(),
-      type: randomObj.getTypeText()
+    const notification = new NotificationMessage('Hello World', {
+      duration: 2000,
+      type: 'success'
     });
 
-    /**
-     * перенесено в index.js
-     * if (notificationNodes.message && notificationNodes.message.offsetWidth) {
-     *  // элемент ранее был и создан и отображается - удалим его со страницы
-     *  notificationNodes.message.remove();
-     * }
-     */ 
-    // создадим новый элемент - что произойдет со старым элементом, он удалится из памяти браузера?
     notification.show();
   });
-
-  
 </script>

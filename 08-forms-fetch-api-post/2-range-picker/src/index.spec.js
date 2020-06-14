@@ -1,6 +1,6 @@
-// import RangePicker from './index.js';
+import RangePicker from './index.js';
 // TODO: remove
-import RangePicker from '../solution';
+// import RangePicker from '../solution';
 
 const getDaysBetweenDates = (from, to) => {
   const millisecondsToDays = ms => ms / (24 * 60 * 60 * 1000);

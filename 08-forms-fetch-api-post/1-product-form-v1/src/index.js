@@ -1,6 +1,7 @@
 // import SortableList from '../../../09-tests-routes-browser-history-api/2-sortable-list/solution/index.js';
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
+import ImageUploader from './utils/image-uploader.js';
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
@@ -13,12 +14,24 @@ export default class ProductForm {
     subElements;
     subCategory = [];
 
+    uploadImageShowEvent = () => {
+        this.subElements.inputFile.click();
+    }
+
+    uploadImageChangeEvent = (event) => {
+        const file = event.target.files[0];
+        
+        if (file) {
+            this.uploadImage(file);
+        }
+        
+
+    }
+
     constructor (productId) {
         this.productId = productId;
 
         this.render();
-        
-
     }
 
     async loadData(productId) {
@@ -32,7 +45,31 @@ export default class ProductForm {
         }
     }
 
-    imageTemplate ({url = '', source = ''} = {}) {
+    async uploadImage (file) {
+        const { uploadImage, imageList } = this.subElements;
+        uploadImage.classList.add("is-loading"),
+        uploadImage.disabled = true;
+
+        const imageUploader = new ImageUploader();
+        const response = await imageUploader.upload(file);
+
+        const data = response.data;
+
+        if (response.success && data) {
+            const url = data.link || '';
+            const source = file.name;
+
+            const imageElement = document.createElement('li');
+            imageElement.innerHTML = this.imageTemplate(url, source);
+
+            imageList.append(imageElement);
+        }
+
+        uploadImage.classList.remove("is-loading"),
+        uploadImage.disabled = false;
+    }
+
+    imageTemplate (url = '', source = '') {
         return `
         <li class="products-edit__imagelist-item sortable-list__item" style="">
           <input type="hidden" name="url" value="${url}">
@@ -47,6 +84,12 @@ export default class ProductForm {
           </button>
           </li>
         `
+    }
+
+    inputFileTemplate () {
+        return `
+            <input type="file" data-element="inputFile" accept="image/*" hidden>
+        `;
     }
 
     getCategories (categories) {
@@ -82,7 +125,15 @@ export default class ProductForm {
 
         this.loadData(this.productId);
 
+        this.initEventListeners();
+
         return this.element;
+    }
+
+    initEventListeners() {
+        const { uploadImage, inputFile } = this.subElements;
+        uploadImage.addEventListener('click', this.uploadImageShowEvent);
+        inputFile.addEventListener('change', this.uploadImageChangeEvent);
     }
 
     categoriesTemplate(subCategory) {
@@ -114,10 +165,10 @@ export default class ProductForm {
             <label class="form-label">Фото</label>
             
             <div data-element="imageListContainer">
-                <ul class="sortable-list"></ul>
+                <ul data-element="imageList" class="sortable-list"></ul>
             </div>
             
-            <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
+            <button type="button" data-element="uploadImage" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
         </div>
         `;
     }
@@ -128,6 +179,7 @@ export default class ProductForm {
             <form data-element="productForm" class="form-grid">
                 ${this.nameDescriptionTemplate()}
                 ${this.imagesTemplate()}
+                ${this.inputFileTemplate()}
                 ${this.propertyTemplate()}
             </form>
         </div>    

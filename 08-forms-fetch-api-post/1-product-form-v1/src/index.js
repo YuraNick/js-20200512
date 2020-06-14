@@ -28,6 +28,18 @@ export default class ProductForm {
 
     }
 
+    deleteImageEvent = (event) => {
+        const currentElement = event.target;
+
+        if (currentElement.hasAttribute('data-delete-handle')) {
+            const itemElement = currentElement.closest('li.sortable-list__item');
+        
+            if (itemElement) {
+                itemElement.remove();
+            }
+        }
+    }
+
     constructor (productId) {
         this.productId = productId;
 
@@ -131,9 +143,17 @@ export default class ProductForm {
     }
 
     initEventListeners() {
-        const { uploadImage, inputFile } = this.subElements;
+        const { uploadImage, imageList, inputFile } = this.subElements;
         uploadImage.addEventListener('click', this.uploadImageShowEvent);
         inputFile.addEventListener('change', this.uploadImageChangeEvent);
+        imageList.addEventListener('click', this.deleteImageEvent);
+    }
+
+    removeEventListeners() {
+        const { uploadImage, imageList, inputFile } = this.subElements;
+        uploadImage.removeEventListener('click', this.uploadImageShowEvent);
+        inputFile.removeEventListener('change', this.uploadImageChangeEvent);
+        imageList.removeEventListener('click', this.deleteImageEvent);
     }
 
     categoriesTemplate(subCategory) {
@@ -237,6 +257,7 @@ export default class ProductForm {
     }
 
     remove() {
+        this.removeEventListeners();
         this.element.remove();
     }
 

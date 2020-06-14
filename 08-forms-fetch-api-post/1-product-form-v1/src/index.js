@@ -24,8 +24,6 @@ export default class ProductForm {
         if (file) {
             this.uploadImage(file);
         }
-        
-
     }
 
     deleteImageEvent = (event) => {
@@ -43,10 +41,10 @@ export default class ProductForm {
     constructor (productId) {
         this.productId = productId;
 
-        this.render();
+        this.render(productId);
     }
 
-    async loadData(productId) {
+    async loadCategories() {
         const categoriesResponse = await fetchJson(`${BACKEND_URL}/${CATEGIRIES_API}`);
 
         if (categoriesResponse && categoriesResponse.length) {
@@ -54,6 +52,30 @@ export default class ProductForm {
             
             // с таким подходом меньше обращений к DOM, чем через new Option (?)
             this.subElements.subCategoryList.innerHTML = this.categoriesTemplate(this.subCategory);
+        }
+    }
+
+    async loadProduct(productId) {
+        const url = new URL(BACKEND_URL, CATEGIRIES_API);
+
+        url.searchParams.set('id', productId);
+
+        const productResponse = await fetchJson(`${BACKEND_URL}/${CATEGIRIES_API}`);
+
+        if (productResponse && productResponse.length) {
+            // this.getCategories(categoriesResponse);
+            console.log();
+            
+            // с таким подходом меньше обращений к DOM, чем через new Option (?)
+            // this.subElements.subCategoryList.innerHTML = this.categoriesTemplate(this.subCategory);
+        }
+    }
+
+    async loadData(productId) {
+        this.loadCategories();
+
+        if (productId) {
+            this.loadProduct(productId);
         }
     }
 

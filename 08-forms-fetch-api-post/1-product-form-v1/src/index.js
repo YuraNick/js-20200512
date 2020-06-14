@@ -17,7 +17,7 @@ export default class ProductForm {
         this.productId = productId;
 
         this.render();
-        this.loadData(productId);
+        
 
     }
 
@@ -26,10 +26,27 @@ export default class ProductForm {
 
         if (categoriesResponse && categoriesResponse.length) {
             this.getCategories(categoriesResponse);
-            // с таким подходом меньше обращений к DOM, чем через new Option
-            this.subElements.productForm.subcategory.innerHTML = this.categoriesTemplate(this.subCategory);
-            console.log(this.subCategory);
+            
+            // с таким подходом меньше обращений к DOM, чем через new Option (?)
+            this.subElements.subCategoryList.innerHTML = this.categoriesTemplate(this.subCategory);
         }
+    }
+
+    imageTemplate ({url = '', source = ''} = {}) {
+        return `
+        <li class="products-edit__imagelist-item sortable-list__item" style="">
+          <input type="hidden" name="url" value="${url}">
+          <input type="hidden" name="source" value="${source}">
+          <span>
+            <img src="icon-grab.svg" data-grab-handle alt="grab">
+            <img class="sortable-table__cell-img" alt="Image" src="${url}">
+            <span>${source}</span>
+          </span>
+          <button type="button">
+            <img src="icon-trash.svg" data-delete-handle alt="delete">
+          </button>
+          </li>
+        `
     }
 
     getCategories (categories) {
@@ -54,7 +71,7 @@ export default class ProductForm {
         return accum;
     }
 
-    render () {
+    async render () {
         const wrapper = document.createElement('div');
         wrapper.innerHTML = this.template();
 
@@ -62,6 +79,10 @@ export default class ProductForm {
         this.element = element;
 
         this.subElements = this.getSubElements(element);
+
+        this.loadData(this.productId);
+
+        return this.element;
     }
 
     categoriesTemplate(subCategory) {
@@ -117,7 +138,7 @@ export default class ProductForm {
         return `
         <div class="form-group form-group__half_left">
             <label class="form-label">Категория</label>
-            <select class="form-control" name="subcategory">
+            <select data-element="subCategoryList" class="form-control" name="subcategory">
             </select>
         </div>
 
@@ -161,6 +182,14 @@ export default class ProductForm {
     
           return accum;
         }, {});
-      }
+    }
+
+    remove() {
+        this.element.remove();
+    }
+
+    destroy() {
+        this.remove();
+    }
 
 }

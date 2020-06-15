@@ -2,6 +2,7 @@
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
 import ImageUploader from './utils/image-uploader.js';
+import NotificationMessage from './utils/NotificationMessage.js';
 
 const BACKEND_URL = 'https://course-js.javascript.ru';
 const BACKEND_SEND_URL = 'https://course-js.javascript.ru';
@@ -80,21 +81,22 @@ export default class ProductForm {
             }
         }
 
+        let notification;
+
         try {
             const response = await fetchJson(url, data);
-            
+
             if (response) {
-                alert('товар сохранен');
+                notification = new NotificationMessage('Товар сохранен', {type : 'success'});
             } else {
-                alert('ошибка');
+                notification = new NotificationMessage('Неизвестная ошибка!', {type : 'error'});
             }
 
         } catch(error) {
-            alert('ошибка');
+            notification = new NotificationMessage(`${error.message}`, {type : 'error'});
         }
 
-        console.log(response);
-
+        notification.show(this.element.productForm);
     }
 
     async loadCategories() {
@@ -145,7 +147,7 @@ export default class ProductForm {
             const source = file.name;
 
             const imageElement = document.createElement('li');
-            imageElement.innerHTML = this.imageTemplate(url, source);
+            imageElement.innerHTML = this.imageTemplate({url, source});
 
             imageList.append(imageElement);
         }
@@ -280,7 +282,7 @@ export default class ProductForm {
     imagesListTemplate() {
         const { images } = this.productData;
 
-        if (! images.length) {
+        if (! images || ! images.length) {
             return '';
         }
 
@@ -307,10 +309,10 @@ export default class ProductForm {
             <form data-element="productForm" class="form-grid">
                 ${this.nameDescriptionTemplate()}
                 ${this.imagesTemplate()}
-                ${this.inputFileTemplate()}
                 ${this.propertyTemplate()}
                 ${this.submitTemplate()}
             </form>
+            ${this.inputFileTemplate()}
         </div>    
         `;
     }

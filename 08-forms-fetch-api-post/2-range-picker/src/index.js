@@ -1,7 +1,6 @@
 export default class RangePicker {
     element;
     subElements;
-    range;
     rightCalendarMonth;
     rightCalendarYear;
 
@@ -22,6 +21,16 @@ export default class RangePicker {
             this.monthShift('left');
         } else if (element.classList.contains('rangepicker__selector-control-right')) {
             this.monthShift('right');
+        } else if (element.classList.contains('rangepicker__cell')) {
+            const endRange = this.rangeChange(element);
+
+            if (endRange) {
+                this.element.dispatchEvent(new CustomEvent('date-select', {
+                    detail: this.getDispatchEventValue(),
+                    bubbles: true
+                  }));
+            }
+
         }
     }
 
@@ -32,6 +41,9 @@ export default class RangePicker {
         this.from = from;
         this.to = to;
         
+        this.checkedFrom = from;
+        this.checkedTo = to;
+        
         this.render();
     }
 
@@ -41,6 +53,14 @@ export default class RangePicker {
         selector.addEventListener('click', this.selectorEvent)
 
         document.addEventListener('click', this.rangePickerHiddenEvent, {capture: false});
+    }
+
+    removeEvents() {
+        const { input, selector } = this.subElements;
+        input.removeEventListener('click', this.rangePickerShowEvent);
+        selector.removeEventListener('click', this.selectorEvent)
+
+        document.removeEventListener('click', this.rangePickerHiddenEvent, {capture: false});
     }
 
     rangePickerShowEvent (event) {
@@ -64,8 +84,50 @@ export default class RangePicker {
         this.initEvents();
     }
 
+    getDispatchEventValue () {
+        return {
+            from : this.from,
+            to : this.to
+        }
+    }
+
+    rangeChange (cell) {
+        const dateCell = this.getCellDate(cell);
+
+        if (this.checkedFrom && this.checkedTo) {
+            this.checkedFrom = dateCell;
+            this.checkedTo = null;
+
+        } else {
+            if (dateCell < this.checkedFrom) {
+                this.checkedTo = this.checkedFrom;
+                this.checkedFrom = dateCell;
+            } else {
+                this.checkedTo = dateCell;
+            }
+
+            this.rangeUpdate(this.checkedFrom, this.checkedTo);
+        }
+
+        this.setSelectedStyle();
+
+        if (this.checkedFrom && this.checkedTo) {
+            return true;
+        }
+    }
+
+    rangeUpdate (checkedFrom, checkedTo) {
+        this.from = checkedFrom;
+        this.to = checkedTo;
+
+        const { from, to } = this.subElements;
+        
+        from.innerText = this.getRangeDate(checkedFrom);
+        to.innerText = this.getRangeDate(checkedTo);
+    }
+
     monthShift (direction = 'left') {
-        this.changeRightCalendarMonth(direction);
+        this.changeCalendarMonth(direction);
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = this.calendarTemplate(direction);
@@ -85,7 +147,7 @@ export default class RangePicker {
         }
     }
 
-    changeRightCalendarMonth (direction = 'left') {
+    changeCalendarMonth (direction = 'left') {
         if (direction === 'left') {
             this.rightCalendarMonth--;
 
@@ -103,30 +165,31 @@ export default class RangePicker {
         }
     }
 
+    getCellDate (cell) {
+        const dataValue = cell.dataset.value;
+        const dateCell = new Date( Date.parse(dataValue) );
+        dateCell.setHours(0, 0, 0, 0);
+
+        return dateCell;
+    }
+
     setSelectedStyle (calendarElement = this.subElements.selector) {
- 
         const cells = calendarElement.querySelectorAll('.rangepicker__cell[data-value]');
         
-        [...cells].forEach(cell => {
-            const dataValue = cell.dataset.value;
-            const dateCell = new Date( Date.parse(dataValue) );
-            dateCell.setHours(0);
+        [...cells].forEach( cell => {
+            const dateCell = this.getCellDate(cell);
 
-            cell.classList.remove('rangepicker__selected-to', 'rangepicker__selected-rrom', 'rangepicker__selected-between');
+            cell.classList.remove('rangepicker__selected-to', 'rangepicker__selected-from', 'rangepicker__selected-between');
 
-            if (dateCell - this.to === 0) {
+            if (dateCell - this.checkedTo === 0) {
                 cell.classList.add('rangepicker__selected-to');
-            } else if (dateCell - this.from === 0) {
+            } else if (dateCell - this.checkedFrom === 0) {
                 cell.classList.add('rangepicker__selected-from');
-            } else if (this.from && dateCell > this.from && dateCell < this.to) {
+            } else if (this.checkedFrom && dateCell > this.checkedFrom && dateCell < this.checkedTo) {
                 cell.classList.add('rangepicker__selected-between');
             }
         });
 
-    }
-
-    getDateOfDayBegin (date) {
-        return new Date('2015-11-11');
     }
 
     getSubElements (element) {
@@ -206,36 +269,49 @@ export default class RangePicker {
 
     getCalendarMonth (position = 'right') {
         const myDate = new Date();
-        myDate.setDate(1);
 
         const year = this.rightCalendarYear;
         const month = (position === 'left') ? this.rightCalendarMonth - 1 : this.rightCalendarMonth;
         
-        myDate.setFullYear(year, month);
-        
-        const myDateObj = this.getMyDateObject(myDate);
+        myDate.setFullYear(year, month, 1);
 
-        return this.daysOfMonthTemplate(myDateObj);
+        
+
+        // const myDateObj = this.getMyDateObject(myDate);
+
+        return this.daysOfMonthTemplate(myDate);
     }
 
-    daysOfMonthTemplate (myDateObj) {
+    daysOfMonthTemplate (date) {
         const daysTemplate = [];
+        const firstDayOfWeekNumber = date.getDay();
+        const month = date.getMonth();
 
-        for (let i = 0; i < myDateObj.daysInMonth; i++) {
-            daysTemplate.push(this.daysOfMonthFirstDayTemplate(myDateObj, i + 1));
+        while (month === date.getMonth()) {
+            daysTemplate.push( this.daysOfMonthFirstDayTemplate(date, firstDayOfWeekNumber) );
+
+            date.setDate( date.getDate() + 1 );
         }
+
+        // const daysTemplate = [];
+
+        // for (let i = 0; i < myDateObj.daysInMonth; i++) {
+        //     daysTemplate.push(this.daysOfMonthFirstDayTemplate(myDateObj, i + 1));
+        // }
 
         return daysTemplate.join('');
     }
 
-    daysOfMonthFirstDayTemplate (myDateObj, day) {
-        const { year, month, hours, minutes, seconds, miliseconds, firstDayOfWeekNumber } = myDateObj;
-        
+    daysOfMonthFirstDayTemplate (date, firstDayOfWeekNumber) {
+        // const { year, month, hours, minutes, seconds, miliseconds, firstDayOfWeekNumber } = myDateObj;
+        const day = date.getDate();
+
         if (day === 1) {
-            return `<button type="button" class="rangepicker__cell" data-value="${this.getDateString(myDateObj, day)}" style="--start-from: ${firstDayOfWeekNumber}">${day}</button>`;
+            return `<button type="button" class="rangepicker__cell" data-value="${date.toISOString()}" style="--start-from: ${firstDayOfWeekNumber}">${day}</button>`;
         }
         
-        return `<button type="button" class="rangepicker__cell" data-value="${this.getDateString(myDateObj, day)}">${day}</button>`;
+        // return `<button type="button" class="rangepicker__cell" data-value="${this.getDateString(myDateObj, day)}">${day}</button>`;
+        return `<button type="button" class="rangepicker__cell" data-value="${date.toISOString()}">${day}</button>`;
     }
 
     getDateString (myDateObj, day) {
@@ -248,7 +324,7 @@ export default class RangePicker {
     getMyDateObject (date) {
         const year = date.getFullYear();
         const month = date.getMonth();
-        const day = date.getDay();
+        const day = date.getDate();
         const hours = date.getHours();
         const minutes = date.getMinutes(); 
         const seconds = date.getSeconds(); 
@@ -269,25 +345,21 @@ export default class RangePicker {
         }
     }
 
-
-
-    getRangeDate(date) {
+    getRangeDate (date) {
         const month = date.getMonth() + 1;
-        const day = date.getDay() + 1;
-        const year = String(date.getFullYear()).slice(2, 4);
+        const day = date.getDate();
+        const year = date.getFullYear();
 
-        return `${month}/${day}/${year}`;
+        return `${day}.${month}.${year}`;
     }
 
     remove() {
+        this.removeEvents();
         this.element.remove();
-
     }
 
     destroy() {
         this.remove();
     }
-
-
 
 }

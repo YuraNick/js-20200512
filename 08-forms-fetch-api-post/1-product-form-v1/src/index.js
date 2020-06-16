@@ -138,19 +138,26 @@ export default class ProductForm {
         uploadImage.disabled = true;
 
         const imageUploader = new ImageUploader();
-        const response = await imageUploader.upload(file);
 
-        const data = response.data;
+        try {
+            const response = await imageUploader.upload(file);
 
-        if (response.success && data) {
-            const url = data.link || '';
-            const source = file.name;
+            const data = response.data;
 
-            const imageElement = document.createElement('li');
-            imageElement.innerHTML = this.imageTemplate({url, source});
+            if (response.success && data) {
+                const url = data.link || '';
+                const source = file.name;
 
-            imageList.append(imageElement);
-        }
+                const imageElement = document.createElement('li');
+                imageElement.innerHTML = this.imageTemplate({url, source});
+
+                imageList.append(imageElement);
+            }
+        } catch(error) {
+            const notification = new NotificationMessage(error.message, {type : 'error'});
+            
+            notification.show(this.element.productForm);
+        } 
 
         uploadImage.classList.remove("is-loading"),
         uploadImage.disabled = false;

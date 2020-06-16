@@ -5,12 +5,21 @@ export default class RangePicker {
     rightCalendarYear;
 
     days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
-    months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']; 
+    months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']; 
+
+
+    rangePickerShowEvent = (event) => {
+        const rangepicker = event.target.closest('.rangepicker');
+        rangepicker.classList.toggle('rangepicker_open');
+
+        this.renderSelected();
+    }
 
     rangePickerHiddenEvent = (event) => {
         const rangepicker = event.target.closest('.rangepicker');
+
         if (! rangepicker) {
-            this.element.classList.remove('rangepicker_open');
+            this.pickerHide();
         }
     }
 
@@ -28,7 +37,9 @@ export default class RangePicker {
                 this.element.dispatchEvent(new CustomEvent('date-select', {
                     detail: this.getDispatchEventValue(),
                     bubbles: true
-                  }));
+                }));
+
+                this.pickerHide();
             }
 
         }
@@ -63,11 +74,6 @@ export default class RangePicker {
         document.removeEventListener('click', this.rangePickerHiddenEvent, {capture: false});
     }
 
-    rangePickerShowEvent (event) {
-        const rangepicker = event.target.closest('.rangepicker');
-        rangepicker.classList.add('rangepicker_open');
-    }
-
     render() {
         this.checkRange();
         this.rightCalendarMonth = this.to.getMonth();
@@ -79,9 +85,16 @@ export default class RangePicker {
         this.element = wrapper.firstElementChild;
         this.subElements = this.getSubElements(this.element);
 
-        this.setSelectedStyle();
-
         this.initEvents();
+    }
+
+    renderSelected() {
+        this.subElements.selector.innerHTML = this.selectorTemplate();
+        this.setSelectedStyle();
+    }
+
+    pickerHide () {
+        this.element.classList.remove('rangepicker_open');
     }
 
     getDispatchEventValue () {
@@ -215,14 +228,18 @@ export default class RangePicker {
         return `
             <div class="rangepicker">
               ${this.iputTemplate()}
-              <div class="rangepicker__selector" data-element="selector">
-                <div class="rangepicker__selector-arrow"></div>
-                <div class="rangepicker__selector-control-left"></div>
-                <div class="rangepicker__selector-control-right"></div>
-                ${this.calendarTemplate('left')}
-                ${this.calendarTemplate('right')}
-              </div>
+              <div class="rangepicker__selector" data-element="selector"></div>
             </div>
+        `;
+    }
+
+    selectorTemplate() {
+        return `
+            <div class="rangepicker__selector-arrow"></div>
+            <div class="rangepicker__selector-control-left"></div>
+            <div class="rangepicker__selector-control-right"></div>
+            ${this.calendarTemplate('left')}
+            ${this.calendarTemplate('right')}
         `;
     }
 
@@ -275,10 +292,6 @@ export default class RangePicker {
         
         myDate.setFullYear(year, month, 1);
 
-        
-
-        // const myDateObj = this.getMyDateObject(myDate);
-
         return this.daysOfMonthTemplate(myDate);
     }
 
@@ -293,64 +306,29 @@ export default class RangePicker {
             date.setDate( date.getDate() + 1 );
         }
 
-        // const daysTemplate = [];
-
-        // for (let i = 0; i < myDateObj.daysInMonth; i++) {
-        //     daysTemplate.push(this.daysOfMonthFirstDayTemplate(myDateObj, i + 1));
-        // }
-
         return daysTemplate.join('');
     }
 
     daysOfMonthFirstDayTemplate (date, firstDayOfWeekNumber) {
-        // const { year, month, hours, minutes, seconds, miliseconds, firstDayOfWeekNumber } = myDateObj;
         const day = date.getDate();
 
         if (day === 1) {
             return `<button type="button" class="rangepicker__cell" data-value="${date.toISOString()}" style="--start-from: ${firstDayOfWeekNumber}">${day}</button>`;
         }
         
-        // return `<button type="button" class="rangepicker__cell" data-value="${this.getDateString(myDateObj, day)}">${day}</button>`;
         return `<button type="button" class="rangepicker__cell" data-value="${date.toISOString()}">${day}</button>`;
     }
 
-    getDateString (myDateObj, day) {
-        const { year, month } = myDateObj;
-        const formatedDay = (day < 10) ? `0${day}` : day;
-
-        return `${year}-${month + 1}-${formatedDay}T00:00:00.000Z`;
-    }
-
-    getMyDateObject (date) {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
-        const hours = date.getHours();
-        const minutes = date.getMinutes(); 
-        const seconds = date.getSeconds(); 
-        const miliseconds = date.getMilliseconds();
-        const daysInMonth = 33 - new Date(year, month, 33).getDate();
-        const firstDayOfWeekNumber = date.getDay();
-
-        return {
-            year,
-            month,
-            day,
-            hours,
-            minutes,
-            seconds,
-            miliseconds,
-            daysInMonth,
-            firstDayOfWeekNumber
-        }
-    }
-
     getRangeDate (date) {
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
+        const month = this.numberToStringLengthTwoFormatting( date.getMonth() + 1 );
+        const day = this.numberToStringLengthTwoFormatting( date.getDate() );
         const year = date.getFullYear();
 
         return `${day}.${month}.${year}`;
+    }
+
+    numberToStringLengthTwoFormatting (number) {
+        return (number > 9) ? number : `0${number}`;
     }
 
     remove() {

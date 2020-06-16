@@ -12,10 +12,12 @@ export default class RangePicker {
         const rangepicker = event.target.closest('.rangepicker');
         rangepicker.classList.toggle('rangepicker_open');
 
-        this.renderSelected();
+        if (! this.subElements.selector.innerHTML) {
+            this.renderSelected();
+        }
     }
 
-    rangePickerHiddenEvent = (event) => {
+    rangePickerHideEvent = (event) => {
         const rangepicker = event.target.closest('.rangepicker');
 
         if (! rangepicker) {
@@ -63,7 +65,7 @@ export default class RangePicker {
         input.addEventListener('click', this.rangePickerShowEvent);
         selector.addEventListener('click', this.selectorEvent)
 
-        document.addEventListener('click', this.rangePickerHiddenEvent, {capture: false});
+        document.addEventListener('click', this.rangePickerHideEvent, {capture: false});
     }
 
     removeEvents() {
@@ -71,7 +73,7 @@ export default class RangePicker {
         input.removeEventListener('click', this.rangePickerShowEvent);
         selector.removeEventListener('click', this.selectorEvent)
 
-        document.removeEventListener('click', this.rangePickerHiddenEvent, {capture: false});
+        document.removeEventListener('click', this.rangePickerHideEvent, {capture: false});
     }
 
     render() {
@@ -93,7 +95,7 @@ export default class RangePicker {
         this.setSelectedStyle();
     }
 
-    pickerHide () {
+    pickerHide() {
         this.element.classList.remove('rangepicker_open');
     }
 
@@ -135,8 +137,8 @@ export default class RangePicker {
 
         const { from, to } = this.subElements;
         
-        from.innerText = this.getRangeDate(checkedFrom);
-        to.innerText = this.getRangeDate(checkedTo);
+        from.textContent = this.getRangeDate(checkedFrom);
+        to.textContent = this.getRangeDate(checkedTo);
     }
 
     monthShift (direction = 'left') {

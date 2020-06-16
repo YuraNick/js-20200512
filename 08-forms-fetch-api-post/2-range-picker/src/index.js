@@ -8,6 +8,23 @@ export default class RangePicker {
     days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
     months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']; 
 
+    rangePickerHiddenEvent = (event) => {
+        const rangepicker = event.target.closest('.rangepicker');
+        if (! rangepicker) {
+            this.element.classList.remove('rangepicker_open');
+        }
+    }
+
+    selectorEvent = (event) => {
+        const element = event.target;
+
+        if (element.classList.contains('rangepicker__selector-control-left')) {
+            this.monthShift('left');
+        } else if (element.classList.contains('rangepicker__selector-control-right')) {
+            this.monthShift('right');
+        }
+    }
+
     constructor({
         from = new Date(),
         to = new Date()
@@ -16,6 +33,19 @@ export default class RangePicker {
         this.to = to;
         
         this.render();
+    }
+
+    initEvents() {
+        const { input, selector } = this.subElements;
+        input.addEventListener('click', this.rangePickerShowEvent);
+        selector.addEventListener('click', this.selectorEvent)
+
+        document.addEventListener('click', this.rangePickerHiddenEvent, {capture: false});
+    }
+
+    rangePickerShowEvent (event) {
+        const rangepicker = event.target.closest('.rangepicker');
+        rangepicker.classList.add('rangepicker_open');
     }
 
     render() {
@@ -27,6 +57,86 @@ export default class RangePicker {
         wrapper.innerHTML = this.template();
 
         this.element = wrapper.firstElementChild;
+        this.subElements = this.getSubElements(this.element);
+
+        this.setSelectedStyle();
+
+        this.initEvents();
+    }
+
+    monthShift (direction = 'left') {
+        this.changeRightCalendarMonth(direction);
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = this.calendarTemplate(direction);
+
+        const calendarElement = wrapper.firstElementChild;
+        this.setSelectedStyle(calendarElement);
+
+        const { selector } = this.subElements;
+        const calendars = selector.querySelectorAll('.rangepicker__calendar');
+
+        if (direction === 'left') {
+            calendars[1].remove();
+            calendars[0].before(calendarElement);
+        } else {
+            calendars[0].remove();
+            calendars[1].after(calendarElement);
+        }
+    }
+
+    changeRightCalendarMonth (direction = 'left') {
+        if (direction === 'left') {
+            this.rightCalendarMonth--;
+
+            if (this.rightCalendarMonth < 0) {
+                this.rightCalendarYear--;
+                this.rightCalendarMonth = this.months.length - 1;
+            }
+        } else {
+            this.rightCalendarMonth++;
+
+            if (this.rightCalendarMonth > this.months.length - 1) {
+                this.rightCalendarYear++;
+                this.rightCalendarMonth = 0;
+            }
+        }
+    }
+
+    setSelectedStyle (calendarElement = this.subElements.selector) {
+ 
+        const cells = calendarElement.querySelectorAll('.rangepicker__cell[data-value]');
+        
+        [...cells].forEach(cell => {
+            const dataValue = cell.dataset.value;
+            const dateCell = new Date( Date.parse(dataValue) );
+            dateCell.setHours(0);
+
+            cell.classList.remove('rangepicker__selected-to', 'rangepicker__selected-rrom', 'rangepicker__selected-between');
+
+            if (dateCell - this.to === 0) {
+                cell.classList.add('rangepicker__selected-to');
+            } else if (dateCell - this.from === 0) {
+                cell.classList.add('rangepicker__selected-from');
+            } else if (this.from && dateCell > this.from && dateCell < this.to) {
+                cell.classList.add('rangepicker__selected-between');
+            }
+        });
+
+    }
+
+    getDateOfDayBegin (date) {
+        return new Date('2015-11-11');
+    }
+
+    getSubElements (element) {
+        const elements = element.querySelectorAll('[data-element]');
+    
+        return [...elements].reduce((accum, subElement) => {
+          accum[subElement.dataset.element] = subElement;
+    
+          return accum;
+        }, {});
     }
 
     checkRange() {
@@ -40,8 +150,7 @@ export default class RangePicker {
 
     template() {
         return `
-          <div class="container">
-            <div class="rangepicker rangepicker_open">
+            <div class="rangepicker">
               ${this.iputTemplate()}
               <div class="rangepicker__selector" data-element="selector">
                 <div class="rangepicker__selector-arrow"></div>
@@ -51,7 +160,6 @@ export default class RangePicker {
                 ${this.calendarTemplate('right')}
               </div>
             </div>
-          </div>
         `;
     }
 
@@ -61,7 +169,7 @@ export default class RangePicker {
             <span data-element="from">${this.getRangeDate(this.from)}</span> -
             <span data-element="to">${this.getRangeDate(this.to)}</span>
           </div>
-        `
+        `;
     }
 
     calendarTemplate (position = 'right') {
@@ -131,9 +239,10 @@ export default class RangePicker {
     }
 
     getDateString (myDateObj, day) {
-        const { year, month, hours, minutes, seconds, miliseconds } = myDateObj;
+        const { year, month } = myDateObj;
+        const formatedDay = (day < 10) ? `0${day}` : day;
 
-        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${miliseconds}Z`;
+        return `${year}-${month + 1}-${formatedDay}T00:00:00.000Z`;
     }
 
     getMyDateObject (date) {
@@ -171,11 +280,12 @@ export default class RangePicker {
     }
 
     remove() {
+        this.element.remove();
 
     }
 
     destroy() {
-
+        this.remove();
     }
 
 

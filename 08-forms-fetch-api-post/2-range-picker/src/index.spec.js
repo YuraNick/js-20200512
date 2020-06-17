@@ -1,6 +1,6 @@
-// import RangePicker from './index.js';
+import RangePicker from './index.js';
 // TODO: remove
-import RangePicker from '../solution';
+// import RangePicker from '../solution';
 
 const getDaysBetweenDates = (from, to) => {
   const millisecondsToDays = ms => ms / (24 * 60 * 60 * 1000);
@@ -154,7 +154,8 @@ describe('forms-fetch-api-part-2/range-picker', () => {
 
     const rightNavigation = rangePicker.element.querySelector('.rangepicker__selector-control-right');
 
-    rightNavigation.dispatchEvent(new MouseEvent('click'));
+    // добавил всплытие события
+    rightNavigation.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     const [first, second] = rangePicker.element.querySelectorAll('.rangepicker__month-indicator');
 
@@ -170,7 +171,8 @@ describe('forms-fetch-api-part-2/range-picker', () => {
 
     const rightNavigation = rangePicker.element.querySelector('.rangepicker__selector-control-left');
 
-    rightNavigation.dispatchEvent(new MouseEvent('click'));
+    // добавил всплытие события
+    rightNavigation.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     const [first, second] = rangePicker.element.querySelectorAll('.rangepicker__month-indicator');
 
@@ -230,7 +232,7 @@ describe('forms-fetch-api-part-2/range-picker', () => {
     const rightNavigation = rangePicker.element.querySelector('.rangepicker__selector-control-right');
 
     // got to the next couple of months
-    rightNavigation.dispatchEvent(new MouseEvent('click'));
+    rightNavigation.dispatchEvent(new MouseEvent('click', { bubbles: true })); // добавил всплытие
 
     const [_, secondCalendar] = selector.querySelectorAll('.rangepicker__calendar');
     const secondDateGrid = secondCalendar.querySelector('.rangepicker__date-grid');
@@ -345,7 +347,7 @@ describe('forms-fetch-api-part-2/range-picker', () => {
     const rightNavigation = rangePicker.element.querySelector('.rangepicker__selector-control-right');
 
     for (let i = 0; i < MONTHS_COUNT; i++) {
-      rightNavigation.dispatchEvent(new MouseEvent('click'));
+      rightNavigation.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     }
 
     const [_, secondCalendar] = selector.querySelectorAll('.rangepicker__calendar');

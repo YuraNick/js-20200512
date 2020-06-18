@@ -6,6 +6,9 @@ export default class SortableTable {
     element;
     subElements;
     sortLabelElement;
+    urlObject;
+    ROWS_STEP = 30;
+    isLoaded = false;
 
     headerSortEvent = event => {
         const headerCell = event.target.closest('[data-sortable=true]');
@@ -14,6 +17,20 @@ export default class SortableTable {
             const field = headerCell.dataset.id;
             const order = this.orderInvert(headerCell.dataset.order);
             this.sortOnServer(field, order);
+        }
+    }
+
+    tableScrollEvent = event => {
+        if (
+            this.isLoaded || 
+            this.element.classList.contains("sortable-table_loading") || 
+            this.element.classList.contains("sortable-table_empty")
+        ){
+            return;
+        }
+
+        if (this.element.getBoundingClientRect().bottom < document.documentElement.clientHeight) {
+            this.loadMoreRows();
         }
     }
 
@@ -29,7 +46,7 @@ export default class SortableTable {
         this.url = url;
 
         this.render(sortField, sortOrder);
-        this.initHeaderSortEvent();
+        
     }
 
     orderInvert (order) {
@@ -41,20 +58,18 @@ export default class SortableTable {
         return obj[order] || 'asc';
     }
 
-    initHeaderSortEvent () {
+    initEventListeners () {
         const { header } = this.subElements;
 
-        if (header) {
-            header.addEventListener('pointerdown', this.headerSortEvent);
-        }
+        header.addEventListener('pointerdown', this.headerSortEvent);
+        window.addEventListener('scroll', this.tableScrollEvent);
     }
 
-    removeEvents() {
+    removeEventListeners() {
         const { header } = this.subElements;
 
-        if (header) {
-            header.removeEventListener('pointerdown', this.headerSortEvent);
-        }
+        header.removeEventListener('pointerdown', this.headerSortEvent);
+        window.removeEventListener('scroll', this.tableScrollEvent);
     }
 
     render (sortField = null, sortOrder = 'asc') {
@@ -81,34 +96,83 @@ export default class SortableTable {
         }
 
         this.update(sortObj);
+
+        this.initEventListeners();
     }
 
-    update (sortObj) {
+    async update (sortObj) {
         const url = new URL(this.url, BACKEND_URL);
 
         for (const [param, val] of Object.entries(sortObj)) {
             url.searchParams.set(param, val);
         }
 
+        this.urlObject = url;
+
         const { body } = this.subElements;
-        const { element } = this;
+        const element = this.element;
         
         body.innerHTML = '';
         element.classList.remove('sortable-table_empty');
         element.classList.add('sortable-table_loading');
-        
-        const response = fetchJson(url);
-        
-        response.then(data => {
-            if (data.length === 0) {
-                element.classList.add('sortable-table_empty');
-            } else {
-                body.innerHTML = this.getTableRows(data);
-            }
 
-            element.classList.remove('sortable-table_loading');
-        });
+        const data = await this.loadData(url);
+
+        if (data.length === 0) {
+            element.classList.add('sortable-table_empty');
+        } else {
+            body.innerHTML = this.getTableRows(data);
+        }
+
+        this.checkIsLoaded(data);
+
+        element.classList.remove('sortable-table_loading');
     }
+
+    checkIsLoaded (data) {
+        if (data.length < this.ROWS_STEP) {
+            this.isLoaded = true;
+        } else {
+            this.isLoaded = false;
+        }
+    }
+
+    async loadData(url) {
+        const response = await fetchJson(url);
+
+        if (response && response.length) {
+            return response;
+        }
+
+        return [];
+    }
+
+    async loadMoreRows () {
+        const element = this.element;
+        const { body } = this.subElements;
+        element.classList.add('sortable-table_loading');
+
+        const url = this.urlObject;
+
+        const prevEnd = parseInt(url.searchParams.get('_end'), 10);
+        const start = prevEnd + 1;
+        const end = start + this.ROWS_STEP;
+
+        url.searchParams.set('_start', start);
+        url.searchParams.set('_end', end);
+
+        const data = await this.loadData(url);
+
+        if (data.length) {
+            body.insertAdjacentHTML("beforeend", this.getTableRows(data));
+        } else {
+            element.classList.add('sortable-table_loading');
+        }
+
+        this.checkIsLoaded(data);
+
+        element.classList.remove('sortable-table_loading');
+    } 
 
     getHeaderCellForSort (field) {
         if (field) {
@@ -127,14 +191,14 @@ export default class SortableTable {
                 _order : order,
                 _sort : field || folderCell.id,
                 _start : 0,
-                _end : 30
+                _end : this.ROWS_STEP
             }
         }
 
         return {
             _embed : 'subcategory.category',
             _start : 0,
-            _end : 30
+            _end : this.ROWS_STEP
         };
     }
 
@@ -254,7 +318,7 @@ export default class SortableTable {
     }
 
     remove() {
-        this.removeEvents();
+        this.removeEventListeners();
         this.element.remove();
     }
 

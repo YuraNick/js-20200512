@@ -1,6 +1,6 @@
-// import SortableList from './index.js';
+import SortableList from './index.js';
 // TODO: remove
-import SortableList from '../solution';
+// import SortableList from '../solution';
 
 describe('tests-for-frontend-apps/sortable-list', () => {
   let sortableList;
